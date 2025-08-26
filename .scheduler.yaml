@@ -1,0 +1,24 @@
+# Scheduler Configuration File
+# This file contains all configurable values for the scheduler application
+
+# Server configuration
+host: "localhost"
+port: 8000
+
+# TODO: Add containerD configuration
+# containerd:
+#   socket: "/run/containerd/containerd.sock"
+#   namespace: "scheduler"
+
+# TODO: Add database configuration
+# database:
+#   host: "localhost"
+#   port: 5432
+#   name: "scheduler"
+#   user: "scheduler"
+#   password: ""
+
+# TODO: Add logging configuration
+# logging:
+#   level: "info"
+#   format: "json"
