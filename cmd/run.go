@@ -11,6 +11,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
+
+	pb "scheduler/proto/gen"
+	"scheduler/internal/service"
 )
 
 var runCmd = &cobra.Command{
@@ -35,8 +38,9 @@ func runServer(cmd *cobra.Command, args []string) {
 	// Create gRPC server
 	server := grpc.NewServer()
 
-	// TODO: Register your gRPC services here
-	// Example: pb.RegisterSchedulerServiceServer(server, &schedulerService{})
+	// Create and register the scheduler service
+	schedulerService := service.NewSchedulerService()
+	pb.RegisterSchedulerServiceServer(server, schedulerService)
 
 	// Create listener
 	listener, err := net.Listen("tcp", address)
