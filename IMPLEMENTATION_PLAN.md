@@ -22,13 +22,23 @@ The scheduler is a Go-based monolithic service that:
 ### Phase 2: gRPC API Definition & Protocol Buffers
 **Estimated Time: 1-2 days**
 
-#### 2.1 Protocol Buffer Definitions
-- [ ] Create `proto/` directory structure
-- [ ] Define `SchedulerService` protobuf messages and services
-- [ ] Define `EnvironmentSpecification` protobuf message
-- [ ] Define `Environment` protobuf message with CRUD operations
-- [ ] Define application stack messages (Frontend, Backend, PostgreSQL containers)
-- [ ] Add container configuration options (image, ports, volumes, environment variables)
+#### 2.1 Protocol Buffer Definitions ✅
+**Status: Completed**
+- [x] Create `proto/` directory structure
+- [x] Define `SchedulerService` protobuf messages and services
+- [x] Define `EnvironmentSpecification` protobuf message
+- [x] Define `Environment` protobuf message with CRUD operations
+- [x] Define application stack messages (Frontend, Backend, PostgreSQL containers)
+- [x] Add container configuration options (image, ports, volumes, environment variables)
+
+**Additional Features Implemented:**
+- [x] Comprehensive status tracking (Environment and Container status enums)
+- [x] Monitoring and metrics collection messages
+- [x] Streaming logs support with GetEnvironmentLogs
+- [x] Network configuration for environments
+- [x] Health checks and restart policies for containers
+- [x] Resource limits (CPU, memory, disk)
+- [x] Pagination support for list operations
 
 #### 2.2 Code Generation & Integration
 - [ ] Set up protobuf code generation (protoc, Go plugins)
