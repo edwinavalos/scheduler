@@ -1,0 +1,287 @@
+syntax = "proto3";
+
+package scheduler.v1;
+
+option go_package = "scheduler/proto/gen";
+
+import "google/protobuf/timestamp.proto";
+
+// SchedulerService provides CRUD operations for managing containerized environments
+service SchedulerService {
+  // Environment CRUD operations
+  rpc CreateEnvironment(CreateEnvironmentRequest) returns (CreateEnvironmentResponse);
+  rpc GetEnvironment(GetEnvironmentRequest) returns (GetEnvironmentResponse);
+  rpc UpdateEnvironment(UpdateEnvironmentRequest) returns (UpdateEnvironmentResponse);
+  rpc DeleteEnvironment(DeleteEnvironmentRequest) returns (DeleteEnvironmentResponse);
+  rpc ListEnvironments(ListEnvironmentsRequest) returns (ListEnvironmentsResponse);
+  
+  // Environment lifecycle operations
+  rpc StartEnvironment(StartEnvironmentRequest) returns (StartEnvironmentResponse);
+  rpc StopEnvironment(StopEnvironmentRequest) returns (StopEnvironmentResponse);
+  rpc RestartEnvironment(RestartEnvironmentRequest) returns (RestartEnvironmentResponse);
+  
+  // Monitoring operations
+  rpc GetEnvironmentStatus(GetEnvironmentStatusRequest) returns (GetEnvironmentStatusResponse);
+  rpc GetEnvironmentLogs(GetEnvironmentLogsRequest) returns (stream GetEnvironmentLogsResponse);
+}
+
+// Container configuration for individual services within an environment
+message ContainerConfig {
+  string name = 1;
+  string image = 2;
+  repeated string command = 3;
+  repeated string args = 4;
+  repeated PortMapping ports = 5;
+  repeated VolumeMount volumes = 6;
+  map<string, string> environment_variables = 7;
+  ResourceLimits resources = 8;
+  HealthCheck health_check = 9;
+  RestartPolicy restart_policy = 10;
+}
+
+// Port mapping configuration
+message PortMapping {
+  int32 container_port = 1;
+  int32 host_port = 2;
+  string protocol = 3; // tcp, udp
+}
+
+// Volume mount configuration
+message VolumeMount {
+  string name = 1;
+  string mount_path = 2;
+  string host_path = 3;
+  bool read_only = 4;
+}
+
+// Resource limits for containers
+message ResourceLimits {
+  int64 memory_mb = 1;
+  double cpu_cores = 2;
+  int64 disk_mb = 3;
+}
+
+// Health check configuration
+message HealthCheck {
+  repeated string command = 1;
+  int32 interval_seconds = 2;
+  int32 timeout_seconds = 3;
+  int32 retries = 4;
+  int32 start_period_seconds = 5;
+}
+
+// Restart policy for containers
+enum RestartPolicy {
+  RESTART_POLICY_UNSPECIFIED = 0;
+  RESTART_POLICY_NO = 1;
+  RESTART_POLICY_ALWAYS = 2;
+  RESTART_POLICY_ON_FAILURE = 3;
+  RESTART_POLICY_UNLESS_STOPPED = 4;
+}
+
+// Application stack definitions
+message ApplicationStack {
+  string name = 1;
+  string version = 2;
+  FrontendConfig frontend = 3;
+  BackendConfig backend = 4;
+  DatabaseConfig database = 5;
+  map<string, ContainerConfig> additional_services = 6;
+}
+
+// Frontend container configuration
+message FrontendConfig {
+  ContainerConfig container = 1;
+  repeated string domains = 2;
+  bool ssl_enabled = 3;
+}
+
+// Backend container configuration  
+message BackendConfig {
+  ContainerConfig container = 1;
+  string database_connection_string = 2;
+  map<string, string> api_keys = 3;
+}
+
+// Database container configuration
+message DatabaseConfig {
+  ContainerConfig container = 1;
+  string database_name = 2;
+  string username = 3;
+  string password = 4;
+  bool persistent_storage = 5;
+  string storage_path = 6;
+}
+
+// Environment specification - defines how an environment should be configured
+message EnvironmentSpecification {
+  string name = 1;
+  string description = 2;
+  ApplicationStack application_stack = 3;
+  map<string, string> labels = 4;
+  NetworkConfig network = 5;
+}
+
+// Network configuration for the environment
+message NetworkConfig {
+  string network_name = 1;
+  string subnet = 2;
+  string gateway = 3;
+  bool isolated = 4;
+}
+
+// Environment represents a deployed containerized environment
+message Environment {
+  string id = 1;
+  string name = 2;
+  EnvironmentSpecification spec = 3;
+  EnvironmentStatus status = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  repeated ContainerInstance containers = 7;
+}
+
+// Current status of an environment
+enum EnvironmentStatus {
+  ENVIRONMENT_STATUS_UNSPECIFIED = 0;
+  ENVIRONMENT_STATUS_PENDING = 1;
+  ENVIRONMENT_STATUS_CREATING = 2;
+  ENVIRONMENT_STATUS_RUNNING = 3;
+  ENVIRONMENT_STATUS_STOPPING = 4;
+  ENVIRONMENT_STATUS_STOPPED = 5;
+  ENVIRONMENT_STATUS_FAILED = 6;
+  ENVIRONMENT_STATUS_UPDATING = 7;
+}
+
+// Instance of a running container within an environment
+message ContainerInstance {
+  string id = 1;
+  string name = 2;
+  string image = 3;
+  ContainerStatus status = 4;
+  google.protobuf.Timestamp started_at = 5;
+  repeated PortMapping exposed_ports = 6;
+  string ip_address = 7;
+}
+
+// Current status of a container
+enum ContainerStatus {
+  CONTAINER_STATUS_UNSPECIFIED = 0;
+  CONTAINER_STATUS_PENDING = 1;
+  CONTAINER_STATUS_PULLING = 2;
+  CONTAINER_STATUS_RUNNING = 3;
+  CONTAINER_STATUS_STOPPING = 4;
+  CONTAINER_STATUS_STOPPED = 5;
+  CONTAINER_STATUS_FAILED = 6;
+  CONTAINER_STATUS_RESTARTING = 7;
+}
+
+// Request/Response messages for CRUD operations
+
+message CreateEnvironmentRequest {
+  EnvironmentSpecification spec = 1;
+}
+
+message CreateEnvironmentResponse {
+  Environment environment = 1;
+}
+
+message GetEnvironmentRequest {
+  string id = 1;
+}
+
+message GetEnvironmentResponse {
+  Environment environment = 1;
+}
+
+message UpdateEnvironmentRequest {
+  string id = 1;
+  EnvironmentSpecification spec = 2;
+}
+
+message UpdateEnvironmentResponse {
+  Environment environment = 1;
+}
+
+message DeleteEnvironmentRequest {
+  string id = 1;
+}
+
+message DeleteEnvironmentResponse {
+  bool success = 1;
+}
+
+message ListEnvironmentsRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+  map<string, string> filters = 3;
+}
+
+message ListEnvironmentsResponse {
+  repeated Environment environments = 1;
+  string next_page_token = 2;
+  int32 total_count = 3;
+}
+
+// Lifecycle operation messages
+
+message StartEnvironmentRequest {
+  string id = 1;
+}
+
+message StartEnvironmentResponse {
+  Environment environment = 1;
+}
+
+message StopEnvironmentRequest {
+  string id = 1;
+  bool force = 2;
+}
+
+message StopEnvironmentResponse {
+  Environment environment = 1;
+}
+
+message RestartEnvironmentRequest {
+  string id = 1;
+}
+
+message RestartEnvironmentResponse {
+  Environment environment = 1;
+}
+
+// Monitoring operation messages
+
+message GetEnvironmentStatusRequest {
+  string id = 1;
+}
+
+message GetEnvironmentStatusResponse {
+  Environment environment = 1;
+  repeated ContainerMetrics container_metrics = 2;
+}
+
+message ContainerMetrics {
+  string container_id = 1;
+  double cpu_usage_percent = 2;
+  int64 memory_usage_bytes = 3;
+  int64 memory_limit_bytes = 4;
+  int64 disk_usage_bytes = 5;
+  int64 network_rx_bytes = 6;
+  int64 network_tx_bytes = 7;
+}
+
+message GetEnvironmentLogsRequest {
+  string id = 1;
+  string container_name = 2; // optional, if empty returns logs for all containers
+  google.protobuf.Timestamp since = 3;
+  int32 tail_lines = 4;
+  bool follow = 5;
+}
+
+message GetEnvironmentLogsResponse {
+  string container_name = 1;
+  string message = 2;
+  google.protobuf.Timestamp timestamp = 3;
+  string level = 4; // info, warn, error, debug
+}
