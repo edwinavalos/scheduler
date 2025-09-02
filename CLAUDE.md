@@ -57,8 +57,24 @@ This is a Go-based container scheduler that manages containerD containers throug
 3. **Test & Lint**: Run `make test` and `make fmt` before committing
 4. **Commit**: Use conventional commit messages (see CODE_GUIDELINES.md)
 5. **Push & PR**: Push branch and create pull request for review
+6. **Request Copilot Review**: After PR creation, request GitHub Copilot review on GitHub.com
 
 **⚠️ NEVER work directly on main branch for features!**
+
+### Feature Completion Workflow (MANDATORY)
+**When a feature implementation is COMPLETE, ALWAYS perform these steps:**
+
+1. **Push Branch**: `make pr` or `git push -u origin <branch-name>`
+2. **Create PR**: If not created automatically, create pull request on GitHub
+3. **Request GitHub Copilot Review**: 
+   - Go to the PR on github.com
+   - Click "Reviewers" in the right sidebar
+   - Add "github-copilot[bot]" as a reviewer
+   - This provides AI-powered code review and suggestions
+4. **Address Review Comments**: Implement any suggested improvements
+5. **Merge**: After review approval, merge the PR
+
+**This workflow ensures code quality and consistency across all features.**
 
 ### Git Workflow Commands
 - `make branch name=feature-name` - Create and switch to new feature branch

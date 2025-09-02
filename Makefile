@@ -125,7 +125,7 @@ branch: ## Create and switch to new feature branch (usage: make branch name=feat
 	@echo "Creating feature branch: feature/$(name)"
 	@git checkout -b feature/$(name)
 
-pr: ## Push current branch and create PR (requires gh CLI)
+pr: ## Push current branch and create PR with Copilot review (requires gh CLI)
 	@current_branch=$$(git branch --show-current); \
 	if [ "$$current_branch" = "main" ]; then \
 		echo "Error: Cannot create PR from main branch!"; \
@@ -136,10 +136,16 @@ pr: ## Push current branch and create PR (requires gh CLI)
 	@git push -u origin $$current_branch
 	@if command -v gh >/dev/null 2>&1; then \
 		echo "Creating pull request..."; \
-		gh pr create --title "$(shell git branch --show-current | sed 's/feature\///' | sed 's/-/ /g')" --body "## Summary\n\n<!-- Describe your changes -->\n\n## Test Plan\n\n- [ ] Tests pass\n- [ ] Code formatted\n- [ ] Manual testing completed"; \
+		pr_url=$$(gh pr create --title "$(shell git branch --show-current | sed 's/feature\///' | sed 's/-/ /g')" --body "## Summary\n\n<!-- Describe your changes -->\n\n## Test Plan\n\n- [ ] Tests pass\n- [ ] Code formatted\n- [ ] Manual testing completed\n\n## Review\n\n- [ ] GitHub Copilot review requested" --reviewer github-copilot[bot] 2>/dev/null || gh pr create --title "$(shell git branch --show-current | sed 's/feature\///' | sed 's/-/ /g')" --body "## Summary\n\n<!-- Describe your changes -->\n\n## Test Plan\n\n- [ ] Tests pass\n- [ ] Code formatted\n- [ ] Manual testing completed\n\n## Review\n\n- [ ] GitHub Copilot review requested"); \
+		echo "✅ PR created: $$pr_url"; \
+		echo "⚠️  IMPORTANT: Manually request GitHub Copilot review:"; \
+		echo "   1. Go to $$pr_url"; \
+		echo "   2. Click 'Reviewers' in right sidebar"; \
+		echo "   3. Add 'github-copilot[bot]' as reviewer"; \
 	else \
 		echo "gh CLI not installed. Please create PR manually at:"; \
 		echo "https://github.com/$$(git remote get-url origin | sed 's/.*github.com[:/]//' | sed 's/.git$$//')/compare/$$current_branch"; \
+		echo "⚠️  Don't forget to request GitHub Copilot review!"; \
 	fi
 
 sync: ## Pull latest changes from main into current branch
