@@ -76,9 +76,9 @@ func testCreateEnvironment(ctx context.Context, client pb.SchedulerServiceClient
 							"SERVER_NAME": "webapp.local",
 						},
 						Resources: &pb.ResourceLimits{
-							MemoryMb:  512,
-							CpuCores:  0.5,
-							DiskMb:    1024,
+							MemoryMb: 512,
+							CpuCores: 0.5,
+							DiskMb:   1024,
 						},
 						HealthCheck: &pb.HealthCheck{
 							Command:            []string{"curl", "-f", "http://localhost/health"},
@@ -94,8 +94,8 @@ func testCreateEnvironment(ctx context.Context, client pb.SchedulerServiceClient
 				},
 				Backend: &pb.BackendConfig{
 					Container: &pb.ContainerConfig{
-						Name:  "webapp-backend",
-						Image: "node:18-alpine",
+						Name:    "webapp-backend",
+						Image:   "node:18-alpine",
 						Command: []string{"node"},
 						Args:    []string{"server.js"},
 						Ports: []*pb.PortMapping{

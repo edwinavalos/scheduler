@@ -48,6 +48,25 @@ This is a Go-based container scheduler that manages containerD containers throug
 - Host and port default to localhost:8000
 - Environment variables: prefix with `SCHEDULER_` (e.g., `SCHEDULER_HOST`, `SCHEDULER_PORT`)
 
+## Git Workflow (MANDATORY)
+
+**CRITICAL: Before starting ANY feature work, ALWAYS follow these steps:**
+
+1. **Create Feature Branch**: `git checkout -b feature/descriptive-name` from main branch
+2. **Work on Feature**: Make changes following CODE_GUIDELINES.md practices  
+3. **Test & Lint**: Run `make test` and `make fmt` before committing
+4. **Commit**: Use conventional commit messages (see CODE_GUIDELINES.md)
+5. **Push & PR**: Push branch and create pull request for review
+
+**⚠️ NEVER work directly on main branch for features!**
+
+### Git Workflow Commands
+- `make branch name=feature-name` - Create and switch to new feature branch
+- `make pr` - Push current branch and open PR (requires gh CLI)
+- `make sync` - Pull latest changes from main into current branch
+
+See CODE_GUIDELINES.md for complete Git hygiene practices.
+
 ## Project Structure
 
 - `main.go`: Entry point
