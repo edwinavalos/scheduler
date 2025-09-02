@@ -30,9 +30,13 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.scheduler.yaml)")
 	rootCmd.PersistentFlags().StringP("host", "H", "localhost", "server host")
 	rootCmd.PersistentFlags().IntP("port", "p", 8000, "server port")
+	rootCmd.PersistentFlags().String("containerd-socket", "/run/containerd/containerd.sock", "containerd socket path")
+	rootCmd.PersistentFlags().String("containerd-namespace", "scheduler", "containerd namespace")
 
 	viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("host"))
 	viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
+	viper.BindPFlag("containerd.socket", rootCmd.PersistentFlags().Lookup("containerd-socket"))
+	viper.BindPFlag("containerd.namespace", rootCmd.PersistentFlags().Lookup("containerd-namespace"))
 }
 
 func initConfig() {
