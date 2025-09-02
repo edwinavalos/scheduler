@@ -12,8 +12,8 @@ import (
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 
-	pb "scheduler/proto/gen"
 	"scheduler/internal/service"
+	pb "scheduler/proto/gen"
 )
 
 var runCmd = &cobra.Command{

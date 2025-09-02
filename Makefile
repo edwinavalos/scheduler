@@ -1,4 +1,4 @@
-.PHONY: help build run clean test fmt deps proto proto-install
+.PHONY: help build run clean test fmt deps proto proto-install branch pr sync
 
 # Default target
 .DEFAULT_GOAL := help
@@ -108,6 +108,50 @@ dev: ## Development mode - build, run with auto-reload (requires entr)
 # Ensure proto generation happens before Go builds
 $(BINARY_NAME): proto $(GO_FILES)
 	go build -o $(BINARY_NAME) .
+
+# Git workflow commands
+branch: ## Create and switch to new feature branch (usage: make branch name=feature-name)
+	@if [ -z "$(name)" ]; then \
+		echo "Error: Please provide branch name (usage: make branch name=feature-name)"; \
+		exit 1; \
+	fi
+	@current_branch=$$(git branch --show-current); \
+	if [ "$$current_branch" != "main" ]; then \
+		echo "Warning: Not on main branch (currently on $$current_branch)"; \
+		echo "Switching to main first..."; \
+		git checkout main; \
+		git pull origin main; \
+	fi
+	@echo "Creating feature branch: feature/$(name)"
+	@git checkout -b feature/$(name)
+
+pr: ## Push current branch and create PR (requires gh CLI)
+	@current_branch=$$(git branch --show-current); \
+	if [ "$$current_branch" = "main" ]; then \
+		echo "Error: Cannot create PR from main branch!"; \
+		echo "Please create a feature branch first: make branch name=your-feature"; \
+		exit 1; \
+	fi
+	@echo "Pushing branch $$current_branch to origin..."
+	@git push -u origin $$current_branch
+	@if command -v gh >/dev/null 2>&1; then \
+		echo "Creating pull request..."; \
+		gh pr create --title "$(shell git branch --show-current | sed 's/feature\///' | sed 's/-/ /g')" --body "## Summary\n\n<!-- Describe your changes -->\n\n## Test Plan\n\n- [ ] Tests pass\n- [ ] Code formatted\n- [ ] Manual testing completed"; \
+	else \
+		echo "gh CLI not installed. Please create PR manually at:"; \
+		echo "https://github.com/$$(git remote get-url origin | sed 's/.*github.com[:/]//' | sed 's/.git$$//')/compare/$$current_branch"; \
+	fi
+
+sync: ## Pull latest changes from main into current branch
+	@current_branch=$$(git branch --show-current); \
+	if [ "$$current_branch" = "main" ]; then \
+		echo "Pulling latest changes from origin/main..."; \
+		git pull origin main; \
+	else \
+		echo "Syncing feature branch $$current_branch with main..."; \
+		git fetch origin main; \
+		git rebase origin/main; \
+	fi
 
 # Mark proto generation as dependency for key targets
 test: proto
