@@ -5,10 +5,10 @@
 host: "localhost"
 port: 8000
 
-# TODO: Add containerD configuration
-# containerd:
-#   socket: "/run/containerd/containerd.sock"
-#   namespace: "scheduler"
+# ContainerD configuration
+containerd:
+  socket: "/run/containerd/containerd.sock"
+  namespace: "scheduler"
 
 # TODO: Add database configuration
 # database:

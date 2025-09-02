@@ -6,18 +6,22 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"scheduler/pkg/containerd"
 	pb "scheduler/proto/gen"
 )
 
 // SchedulerService implements the gRPC SchedulerService interface
 type SchedulerService struct {
 	pb.UnimplementedSchedulerServiceServer
-	// TODO: Add dependencies like containerD client, database, etc.
+	containerdManager *containerd.Manager
+	// TODO: Add additional dependencies like database, etc.
 }
 
 // NewSchedulerService creates a new instance of the scheduler service
-func NewSchedulerService() *SchedulerService {
-	return &SchedulerService{}
+func NewSchedulerService(containerdManager *containerd.Manager) *SchedulerService {
+	return &SchedulerService{
+		containerdManager: containerdManager,
+	}
 }
 
 // CreateEnvironment creates a new environment based on the specification

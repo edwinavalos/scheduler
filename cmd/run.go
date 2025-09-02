@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
@@ -8,11 +9,13 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 
 	"scheduler/internal/service"
+	"scheduler/pkg/containerd"
 	pb "scheduler/proto/gen"
 )
 
@@ -33,13 +36,35 @@ func runServer(cmd *cobra.Command, args []string) {
 	port := viper.GetInt("port")
 	address := fmt.Sprintf("%s:%d", host, port)
 
+	// Setup logger
+	logger := logrus.New()
+	logger.SetLevel(logrus.InfoLevel)
+
+	// Setup containerD configuration
+	containerdConfig := containerd.Config{
+		Socket:    viper.GetString("containerd.socket"),
+		Namespace: viper.GetString("containerd.namespace"),
+	}
+
+	// Create containerD manager
+	containerdManager := containerd.NewManager(containerdConfig, logger)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Start containerD manager
+	if err := containerdManager.Start(ctx); err != nil {
+		log.Fatalf("Failed to start containerd manager: %v", err)
+	}
+	defer containerdManager.Stop()
+
 	fmt.Printf("Starting scheduler server on %s\n", address)
 
 	// Create gRPC server
 	server := grpc.NewServer()
 
-	// Create and register the scheduler service
-	schedulerService := service.NewSchedulerService()
+	// Create and register the scheduler service with containerD manager
+	schedulerService := service.NewSchedulerService(containerdManager)
 	pb.RegisterSchedulerServiceServer(server, schedulerService)
 
 	// Create listener
